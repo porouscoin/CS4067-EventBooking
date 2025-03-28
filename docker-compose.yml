@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: bookingdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodbdata:/data/db
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  user-service:
+    build: ./user-service
+    container_name: user_service
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://postgres:12345@postgres:5432/userdb
+      JWT_SECRET: 195d1c01737fdf8e9be5c3bde8c91094
+      PORT: 5001
+    ports:
+      - "5001:5001"
+
+  event-service:
+    build: ./event-service
+    container_name: event_service
+    restart: always
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/eventdb
+      PORT: 5002
+    ports:
+      - "5002:5002"
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking_service
+    restart: always
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      DATABASE_URL: postgresql://postgres:12345@postgres:5432/bookingdb
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      PORT: 5003
+    ports:
+      - "5003:5003"
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification_service
+    restart: always
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/notifications
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      EMAIL_USER: ziyadhisham106@gmail.com
+      EMAIL_PASS: ybqc duvs wghj hsot
+      PORT: 5004
+    ports:
+      - "5004:5004"
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    depends_on:
+      - user-service
+      - event-service
+      - booking-service
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  mongodbdata:

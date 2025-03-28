@@ -3,28 +3,17 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 require("dotenv").config();
-const pool = require("./config/db"); // ✅ PostgreSQL pool
-const bookingRoutes = require("./routes/bookings"); // ✅ Import booking routes
+const bookingRoutes = require("./routes/bookings");
 
 const app = express();
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.json()); // Ensure JSON body parsing
+app.use(express.json());
 
-
-// Test Database Connection
-pool.query("SELECT NOW()", (err, res) => {
-  if (err) {
-    console.error("❌ PostgreSQL Connection Failed:", err);
-  } else {
-    console.log("✅ PostgreSQL Connected at:", res.rows[0].now);
-  }
-});
-
-// Root Route for Testing
+// Default Landing Page
 app.get("/", (req, res) => {
   res.send("Booking Service is running 🚀");
 });

@@ -8,7 +8,10 @@ const eventSchema = new mongoose.Schema({
     total_tickets: { type: Number, required: true },
     available_tickets: { type: Number, required: true, default: 100 },
     price: { type: Number, required: true }
-}, { timestamps: true });
+}, { 
+    timestamps: false,  // Disables `createdAt` and `updatedAt`
+    versionKey: false   // Disables `__v`
+});
 
 const Event = mongoose.model("Event", eventSchema);
 

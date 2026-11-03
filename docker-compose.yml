@@ -83,8 +83,8 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017/notifications
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
-      EMAIL_USER: ziyadhisham106@gmail.com
-      EMAIL_PASS: ybqc duvs wghj hsot
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
       PORT: 5004
     ports:
       - "5004:5004"
